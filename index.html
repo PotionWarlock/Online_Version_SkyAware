@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SkyAware - Local</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      color: #333;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    .header {
+      background: linear-gradient(135deg, #00b4db, #0083b0);
+      padding: 40px 0;
+      border-radius: 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .header::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" opacity="0.1"><circle cx="50" cy="50" r="2" fill="white"/></svg>') repeat;
+    }
+    
+    .title {
+      display: inline-block;
+      background: linear-gradient(135deg, #5a0dd6, #8a2be2);
+      color: white;
+      font-size: 3rem;
+      font-weight: bold;
+      padding: 20px 60px;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      position: relative;
+      z-index: 1;
+    }
+    
+    .subtitle {
+      color: white;
+      font-size: 1.2rem;
+      margin-top: 15px;
+      opacity: 0.9;
+      position: relative;
+      z-index: 1;
+    }
+    
+    .dashboard {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 25px;
+      margin-bottom: 30px;
+    }
+    
+    .card {
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+    }
+    
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+    }
+    
+    .weather::before {
+      background: linear-gradient(135deg, #008ca8, #00b4db);
+    }
+    
+    .pollution::before {
+      background: linear-gradient(135deg, #00c8e0, #00a8c8);
+    }
+    
+    .mitigation::before {
+      background: linear-gradient(135deg, #b9ff66, #8cd667);
+    }
+    
+    .card-title {
+      font-size: 1.8rem;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color: #2c3e50;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .card-title i {
+      font-size: 1.5rem;
+    }
+    
+    .control-group {
+      margin-bottom: 25px;
+    }
+    
+    select {
+      width: 100%;
+      padding: 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      background: white;
+      transition: border-color 0.3s ease;
+      cursor: pointer;
+    }
+    
+    select:focus {
+      outline: none;
+      border-color: #5a0dd6;
+    }
+    
+    button {
+      width: 100%;
+      padding: 15px;
+      background: linear-gradient(135deg, #5a0dd6, #6b1ce8);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 15px rgba(90, 13, 214, 0.3);
+    }
+    
+    button:hover {
+      background: linear-gradient(135deg, #4a0bc0, #5a0dd6);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(90, 13, 214, 0.4);
+    }
+    
+    button:active {
+      transform: translateY(0);
+    }
+    
+    .data-display {
+      background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+      border-radius: 12px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+    
+    .data-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #dee2e6;
+    }
+    
+    .data-item:last-child {
+      border-bottom: none;
+    }
+    
+    .data-label {
+      font-weight: 600;
+      color: #495057;
+    }
+    
+    .data-value {
+      font-weight: bold;
+      color: #5a0dd6;
+      font-size: 1.1rem;
+    }
+    
+    .pollution-level {
+      display: inline-block;
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.9rem;
+      font-weight: bold;
+      margin-left: 10px;
+    }
+    
+    .level-low {
+      background: #d4edda;
+      color: #155724;
+    }
+    
+    .level-medium {
+      background: #fff3cd;
+      color: #856404;
+    }
+    
+    .level-high {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    
+    .mitigation-tips {
+      list-style: none;
+      padding: 0;
+    }
+    
+    .mitigation-tips li {
+      padding: 12px 0;
+      border-bottom: 1px solid #e9ecef;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    
+    .mitigation-tips li:last-child {
+      border-bottom: none;
+    }
+    
+    .tip-icon {
+      width: 24px;
+      height: 24px;
+      background: #b9ff66;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: #2d5016;
+    }
+    
+    .footer {
+      background: linear-gradient(135deg, #d9d9d9, #c0c0c0);
+      border-radius: 20px;
+      padding: 40px;
+      text-align: center;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .footer-title {
+      font-size: 2.2rem;
+      font-weight: bold;
+      color: #2c3e50;
+      margin-bottom: 20px;
+    }
+    
+    .footer-content {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+    
+    .footer-item {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .loading {
+      text-align: center;
+      padding: 20px;
+      color: #6c757d;
+    }
+    
+    .loading::after {
+      content: '...';
+      animation: dots 1.5s steps(4, end) infinite;
+    }
+    
+    @keyframes dots {
+      0%, 20% { color: rgba(0,0,0,0); text-shadow: .25em 0 0 rgba(0,0,0,0), .5em 0 0 rgba(0,0,0,0); }
+      40% { color: #6c757d; text-shadow: .25em 0 0 rgba(0,0,0,0), .5em 0 0 rgba(0,0,0,0); }
+      60% { text-shadow: .25em 0 0 #6c757d, .5em 0 0 rgba(0,0,0,0); }
+      80%, 100% { text-shadow: .25em 0 0 #6c757d, .5em 0 0 #6c757d; }
+    }
+    
+    @media (max-width: 768px) {
+      .title {
+        font-size: 2rem;
+        padding: 15px 30px;
+      }
+      
+      .dashboard {
+        grid-template-columns: 1fr;
+      }
+      
+      .container {
+        padding: 10px;
+      }
+    }
+
+/* Chart Styles */
+.chart-container {
+    background: white;
+    border-radius: 15px;
+    padding: 25px;
+    margin-top: 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.chart-title {
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.chart-controls {
+    display: flex;
+    gap: 10px;
+}
+
+.chart-controls select {
+    padding: 8px 15px;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    background: white;
+    cursor: pointer;
+}
+
+.chart-canvas {
+    width: 100%;
+    height: 300px;
+    position: relative;
+}
+
+.tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.tab {
+    padding: 10px 20px;
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tab.active {
+    background: #5a0dd6;
+    color: white;
+    border-color: #5a0dd6;
+}
+
+.tab:hover {
+    border-color: #5a0dd6;
+}
+
+/* Responsive Mitigation Styles */
+.situation-alert {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+    border-left: 5px solid #ffc107;
+}
+
+.situation-alert.critical {
+    background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+    border-left-color: #dc3545;
+}
+
+.situation-alert.good {
+    background: linear-gradient(135deg, #d1ecf1, #bee5eb);
+    border-left-color: #17a2b8;
+}
+
+.situation-alert.moderate {
+    background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+    border-left-color: #ffc107;
+}
+
+.alert-icon {
+    font-size: 1.5rem;
+}
+
+.alert-text {
+    font-weight: 600;
+    color: #856404;
+}
+
+.situation-alert.critical .alert-text {
+    color: #721c24;
+}
+
+.situation-alert.good .alert-text {
+    color: #0c5460;
+}
+
+.recommendations-container {
+    display: grid;
+    gap: 20px;
+}
+
+.recommendation-category h4 {
+    color: #2c3e50;
+    margin-bottom: 12px;
+    font-size: 1.1rem;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 8px;
+}
+
+.emergency-tip {
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 8px;
+    padding: 12px;
+    margin: 8px 0;
+}
+
+.emergency-tip .tip-icon {
+    background: #dc3545;
+    color: white;
+}
+
+.health-warning {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 8px;
+    padding: 12px;
+    margin: 8px 0;
+}
+
+/* Weather Current Styles */
+.weather-current {
+    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-left: 4px solid #2196f3;
+}
+
+.weather-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #90caf9;
+}
+
+.weather-icon {
+    font-size: 1.5rem;
+}
+
+.weather-loading {
+    text-align: center;
+    padding: 10px;
+    color: #666;
+    font-style: italic;
+}
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="title">🌤️ SkyAware</div>
+      <div class="subtitle">Real-time Environmental Monitoring Dashboard</div>
+    </div>
+
+    <div class="dashboard">
+      <!-- Weather Card -->
+<!-- Weather Card -->
+<div class="card weather">
+    <div class="card-title">⛅ Weather Data</div>
+    <div class="control-group">
+        <select id="stateSelect">
+            <option value="" disabled selected>Loading states...</option>
+        </select>
+    </div>
+    <button onclick="submitState()">Get Environmental Data</button>
+    <div class="data-display">
+        <!-- Real-time Weather Data -->
+        <div class="weather-current">
+            <div class="weather-header">
+                <span class="data-label">Current Weather:</span>
+                <span id="weatherIcon" class="weather-icon">🌤️</span>
+            </div>
+            <div class="data-item">
+                <span class="data-label">Temperature:</span>
+                <span id="temperature" class="data-value">--</span>
+            </div>
+            <div class="data-item">
+                <span class="data-label">Conditions:</span>
+                <span id="weatherConditions" class="data-value">--</span>
+            </div>
+            <div class="data-item">
+                <span class="data-label">Humidity:</span>
+                <span id="humidity" class="data-value">--</span>
+            </div>
+            <div class="data-item">
+                <span class="data-label">Wind Speed:</span>
+                <span id="windSpeed" class="data-value">--</span>
+            </div>
+        </div>
+        
+        <!-- Original Surface Pressure -->
+        <div class="data-item">
+            <span class="data-label">Surface Pressure:</span>
+            <span id="surfacePressure" class="data-value">--</span>
+        </div>
+        <div class="data-item">
+            <span class="data-label">Last Updated:</span>
+            <span id="lastUpdated" class="data-value">--</span>
+        </div>
+    </div>
+</div>
+
+      <!-- Pollution Card -->
+      <div class="card pollution">
+        <div class="card-title">🌫️ Pollution Levels</div>
+        <div class="data-display">
+          <div class="data-item">
+            <span class="data-label">MAX Formaldehyde:</span>
+            <span id="maxFormaldehyde" class="data-value">--</span>
+            <span id="maxLevel" class="pollution-level level-low">--</span>
+          </div>
+          <div class="data-item">
+            <span class="data-label">MIN Formaldehyde:</span>
+            <span id="minFormaldehyde" class="data-value">--</span>
+            <span id="minLevel" class="pollution-level level-low">--</span>
+          </div>
+          <div class="data-item">
+            <span class="data-label">Air Quality Index:</span>
+            <span id="airQuality" class="data-value">--</span>
+          </div>
+        </div>
+      </div>
+
+<!-- Mitigation Card -->
+<div class="card mitigation">
+    <div class="card-title">💡 Health & Safety Recommendations</div>
+    <div class="data-display">
+        <div class="situation-alert" id="situationAlert">
+            <div class="alert-icon">⚠️</div>
+            <div class="alert-text">Select a state to see personalized recommendations</div>
+        </div>
+        <div class="recommendations-container">
+            <div class="recommendation-category">
+                <h4>🌫️ Air Quality Recommendations</h4>
+                <ul class="mitigation-tips" id="airQualityTips">
+                    <li>
+                        <span class="tip-icon">💡</span>
+                        <span>Select a state to see personalized air quality advice</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="recommendation-category">
+                <h4>🌤️ Weather Recommendations</h4>
+                <ul class="mitigation-tips" id="weatherTips">
+                    <li>
+                        <span class="tip-icon">💡</span>
+                        <span>Select a state to see weather-related guidance</span>
+                    </li>
+                </ul>
+            </div>
+            <div class="recommendation-category">
+                <h4>🏥 Health Protection</h4>
+                <ul class="mitigation-tips" id="healthTips">
+                    <li>
+                        <span class="tip-icon">💡</span>
+                        <span>Select a state to see health protection measures</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+    </div>
+
+    <!-- Historical Data Footer -->
+<!-- Historical Data Footer with Charts -->
+<div class="footer">
+    <div class="footer-title">📊 Historical Data Analysis</div>
+    
+    <!-- Chart Section -->
+    <div class="chart-container">
+        <div class="chart-header">
+            <div class="chart-title">Environmental Trends Over Time</div>
+            <div class="chart-controls">
+                <select id="metricSelect">
+                    <option value="max_formaldehyde">MAX Formaldehyde</option>
+                    <option value="min_formaldehyde">MIN Formaldehyde</option>
+                    <option value="surface_pressure">Surface Pressure</option>
+                </select>
+                <select id="timeframeSelect">
+                    <option value="all">All Time</option>
+                    <option value="30">Last 30 Days</option>
+                    <option value="7">Last 7 Days</option>
+                </select>
+            </div>
+        </div>
+        <div class="chart-canvas">
+            <canvas id="trendChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Existing trend analysis cards -->
+    <div class="footer-content" id="trendAnalysisContent">
+        <div class="footer-item">
+            <strong>Trend Analysis</strong>
+            <p>Monthly pollution patterns and weather correlations</p>
+        </div>
+        <div class="footer-item">
+            <strong>Regional Comparison</strong>
+            <p>Compare environmental data across different states</p>
+        </div>
+        <div class="footer-item">
+            <strong>Forecast Models</strong>
+            <p>Predictive analysis for future environmental conditions</p>
+        </div>
+    </div>
+</div>
+  </div>
+
+<!-- Add this before your existing script -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <script>
+    // Load states dynamically from backend
+    async function loadStates() {
+      try {
+        const select = document.getElementById('stateSelect');
+        select.innerHTML = '<option value="" disabled selected>Loading states...</option>';
+        
+        const res = await fetch('/api/states');
+        if (!res.ok) throw new Error('Network response was not ok');
+        
+        const states = await res.json();
+        
+        select.innerHTML = '<option value="" disabled selected>Select a state</option>';
+        states.forEach(state => {
+          const option = document.createElement('option');
+          option.value = state;
+          option.textContent = state;
+          select.appendChild(option);
+        });
+      } catch (err) {
+        console.error('Failed to load states:', err);
+        const select = document.getElementById('stateSelect');
+        select.innerHTML = '<option value="" disabled selected>Error loading states</option>';
+      }
+    }
+
+    // Submit state and fetch data
+    async function submitState() {
+      const selectedState = document.getElementById('stateSelect').value;
+      if (!selectedState) {
+        alert('⚠️ Please select a state first.');
+        return;
+      }
+
+      try {
+        // Show loading state
+        document.getElementById('surfacePressure').textContent = 'Loading...';
+        document.getElementById('maxFormaldehyde').textContent = 'Loading...';
+        document.getElementById('minFormaldehyde').textContent = 'Loading...';
+        document.getElementById('airQuality').textContent = 'Loading...';
+
+await fetchWeatherData(selectedState);
+
+        const response = await fetch('/api/state', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ state: selectedState })
+        });
+
+        if (!response.ok) throw new Error('Network response was not ok');
+
+        const data = await response.json();
+
+        if (data.error) {
+          alert('Error: ' + data.error);
+          return;
+        }
+
+        // Update UI with received data
+        document.getElementById('surfacePressure').textContent = 
+          data.surface_pressure.toLocaleString() + ' hPa';
+        
+        document.getElementById('maxFormaldehyde').textContent = 
+          formatScientific(data.max_formaldehyde) + ' mol/cm²';
+        
+        document.getElementById('minFormaldehyde').textContent = 
+          formatScientific(data.min_formaldehyde) + ' mol/cm²';
+
+        // Calculate and display air quality
+        const avgFormaldehyde = (data.max_formaldehyde + data.min_formaldehyde) / 2;
+        const airQuality = calculateAirQuality(avgFormaldehyde);
+        document.getElementById('airQuality').textContent = airQuality.index;
+        document.getElementById('airQuality').style.color = airQuality.color;
+
+        // Update pollution levels
+        updatePollutionLevels(data.max_formaldehyde, data.min_formaldehyde);
+
+// Update mitigation recommendations based on current data
+updateMitigationDisplay(data.max_formaldehyde, data.min_formaldehyde, data.surface_pressure);
+
+        // Update last updated time
+        document.getElementById('lastUpdated').textContent = new Date().toLocaleTimeString();
+await loadHistoricalData(selectedState);
+
+      } catch (err) {
+        console.error('Connection error:', err);
+        alert('❌ Cannot connect to backend! Make sure the Flask server is running on http://127.0.0.1:5000');
+        
+        // Reset display values
+        document.getElementById('surfacePressure').textContent = '--';
+        document.getElementById('maxFormaldehyde').textContent = '--';
+        document.getElementById('minFormaldehyde').textContent = '--';
+        document.getElementById('airQuality').textContent = '--';
+      }
+    }
+
+    // Format scientific notation for better readability
+    function formatScientific(value) {
+      if (value >= 1e6) {
+        return (value / 1e6).toFixed(2) + 'M';
+      } else if (value >= 1e3) {
+        return (value / 1e3).toFixed(2) + 'K';
+      }
+      return value.toFixed(2);
+    }
+
+    // Calculate air quality based on formaldehyde levels
+    function calculateAirQuality(avgFormaldehyde) {
+      if (avgFormaldehyde < 1e15) return { index: 'Good', color: '#28a745' };
+      if (avgFormaldehyde < 5e15) return { index: 'Moderate', color: '#ffc107' };
+      if (avgFormaldehyde < 1e16) return { index: 'Unhealthy', color: '#fd7e14' };
+      return { index: 'Hazardous', color: '#dc3545' };
+    }
+
+    // Update pollution level indicators
+    function updatePollutionLevels(maxFormaldehyde, minFormaldehyde) {
+      const maxLevel = document.getElementById('maxLevel');
+      const minLevel = document.getElementById('minLevel');
+
+      maxLevel.textContent = getPollutionLevel(maxFormaldehyde);
+      minLevel.textContent = getPollutionLevel(minFormaldehyde);
+
+      maxLevel.className = `pollution-level ${getPollutionClass(maxFormaldehyde)}`;
+      minLevel.className = `pollution-level ${getPollutionClass(minFormaldehyde)}`;
+    }
+
+    function getPollutionLevel(value) {
+      if (value < 1e15) return 'Low';
+      if (value < 5e15) return 'Medium';
+      if (value < 1e16) return 'High';
+      return 'Very High';
+    }
+
+    function getPollutionClass(value) {
+      if (value < 1e15) return 'level-low';
+      if (value < 5e15) return 'level-medium';
+      return 'level-high';
+    }
+
+
+    // Load states when page loads
+window.addEventListener('load', function() {
+    loadStates();
+    initializeChartControls(); // Add this line
+});
+
+    // Add keyboard support
+    document.addEventListener('keypress', function(event) {
+      if (event.key === 'Enter') {
+        submitState();
+      }
+    });
+
+// Add this function to fetch and display historical data
+async function loadHistoricalData(state) {
+    try {
+        const response = await fetch(`/api/history/${encodeURIComponent(state)}`);
+        const data = await response.json();
+
+        if (data.error) {
+            console.error('Error loading historical data:', data.error);
+            return;
+        }
+
+        // Update the historical data section
+        updateHistoricalDisplay(data.history, data.trends);
+        
+    } catch (err) {
+        console.error('Failed to load historical data:', err);
+    }
+}
+
+// Function to update the historical data display
+function updateHistoricalDisplay(history, trends) {
+    const historicalSection = document.querySelector('.footer-content');
+    
+    if (!historicalSection) return;
+
+    let trendsHTML = `
+        <div class="footer-item">
+            <strong>📈 Trend Analysis</strong>
+            <div class="trend-info">
+    `;
+
+    if (trends.air_quality_trend) {
+        const trend = trends.air_quality_trend;
+        const trendIcon = trend.direction === 'increasing' ? '📈' : 
+                         trend.direction === 'decreasing' ? '📉' : '➡️';
+        const trendColor = trend.direction === 'increasing' ? '#dc3545' : 
+                          trend.direction === 'decreasing' ? '#28a745' : '#6c757d';
+        
+        trendsHTML += `
+            <p style="color: ${trendColor}; font-weight: bold;">
+                ${trendIcon} ${trend.description}
+            </p>
+        `;
+    }
+
+    if (trends['Surface Pressure']) {
+        const pressureTrend = trends['Surface Pressure'];
+        trendsHTML += `
+            <p>Pressure: ${pressureTrend.change > 0 ? '+' : ''}${pressureTrend.change.toFixed(2)} hPa</p>
+        `;
+    }
+
+    trendsHTML += `
+            </div>
+        </div>
+        <div class="footer-item">
+            <strong>📊 Data Points</strong>
+            <p>${history.dates.length} records available</p>
+            <p>Date range: ${history.dates[0]} to ${history.dates[history.dates.length - 1]}</p>
+        </div>
+        <div class="footer-item">
+            <strong>🔍 Latest Readings</strong>
+            <p>Max HCHO: ${formatScientific(history.max_formaldehyde[history.max_formaldehyde.length - 1])}</p>
+            <p>Min HCHO: ${formatScientific(history.min_formaldehyde[history.min_formaldehyde.length - 1])}</p>
+            <p>Pressure: ${history.surface_pressure[history.surface_pressure.length - 1].toFixed(2)} hPa</p>
+        </div>
+    `;
+
+    historicalSection.innerHTML = trendsHTML;
+}
+
+
+// Chart variables
+let trendChart = null;
+
+// NEW FUNCTION: Initialize or update the trend chart
+function updateTrendChart(historyData, selectedMetric = 'max_formaldehyde') {
+    const ctx = document.getElementById('trendChart').getContext('2d');
+    
+    // Destroy existing chart if it exists
+    if (trendChart) {
+        trendChart.destroy();
+    }
+
+    const metricLabels = {
+        'max_formaldehyde': 'MAX Formaldehyde',
+        'min_formaldehyde': 'MIN Formaldehyde', 
+        'surface_pressure': 'Surface Pressure'
+    };
+
+    const metricUnits = {
+        'max_formaldehyde': 'molecules/cm²',
+        'min_formaldehyde': 'molecules/cm²',
+        'surface_pressure': 'hPa'
+    };
+
+    const metricColors = {
+        'max_formaldehyde': 'rgba(220, 53, 69, 1)',
+        'min_formaldehyde': 'rgba(255, 193, 7, 1)',
+        'surface_pressure': 'rgba(0, 123, 255, 1)'
+    };
+
+    // Prepare data based on selected timeframe
+    const timeframe = document.getElementById('timeframeSelect').value;
+    let dates = historyData.dates;
+    let values = historyData[selectedMetric];
+
+    if (timeframe !== 'all') {
+        const days = parseInt(timeframe);
+        const cutoffDate = new Date();
+        cutoffDate.setDate(cutoffDate.getDate() - days);
+        
+        const filteredData = dates.map((date, index) => ({
+            date: new Date(date),
+            value: values[index]
+        })).filter(item => item.date >= cutoffDate);
+
+        dates = filteredData.map(item => item.date.toISOString().split('T')[0]);
+        values = filteredData.map(item => item.value);
+    }
+
+    // Format values for display
+    const formattedValues = values.map(value => {
+        if (selectedMetric.includes('formaldehyde')) {
+            return value / 1e15; // Convert to readable units
+        }
+        return value;
+    });
+
+    const unit = selectedMetric.includes('formaldehyde') ? '×10¹⁵ molecules/cm²' : metricUnits[selectedMetric];
+
+    trendChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: dates,
+            datasets: [{
+                label: `${metricLabels[selectedMetric]} (${unit})`,
+                data: formattedValues,
+                borderColor: metricColors[selectedMetric],
+                backgroundColor: metricColors[selectedMetric].replace('1)', '0.1)'),
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: metricColors[selectedMetric],
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 7
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: true,
+                    position: 'top',
+                },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    callbacks: {
+                        label: function(context) {
+                            let value = context.raw;
+                            if (selectedMetric.includes('formaldehyde')) {
+                                return `${metricLabels[selectedMetric]}: ${value.toFixed(2)}×10¹⁵ molecules/cm²`;
+                            }
+                            return `${metricLabels[selectedMetric]}: ${value.toFixed(2)} ${unit}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Date'
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    }
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: unit
+                    },
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    },
+                    beginAtZero: selectedMetric.includes('formaldehyde')
+                }
+            },
+            interaction: {
+                mode: 'nearest',
+                axis: 'x',
+                intersect: false
+            }
+        }
+    });
+}
+
+// NEW FUNCTION: Enhanced historical display with chart
+function updateHistoricalDisplay(history, trends) {
+    const historicalSection = document.getElementById('trendAnalysisContent');
+    
+    if (!historicalSection) return;
+
+    let trendsHTML = `
+        <div class="footer-item">
+            <strong>📈 Trend Analysis</strong>
+            <div class="trend-info">
+    `;
+
+    if (trends.air_quality_trend) {
+        const trend = trends.air_quality_trend;
+        const trendIcon = trend.direction === 'increasing' ? '📈' : 
+                         trend.direction === 'decreasing' ? '📉' : '➡️';
+        const trendColor = trend.direction === 'increasing' ? '#dc3545' : 
+                          trend.direction === 'decreasing' ? '#28a745' : '#6c757d';
+        
+        trendsHTML += `
+            <p style="color: ${trendColor}; font-weight: bold;">
+                ${trendIcon} ${trend.description}
+            </p>
+        `;
+    }
+
+    if (trends['Surface Pressure']) {
+        const pressureTrend = trends['Surface Pressure'];
+        const pressureIcon = pressureTrend.change > 0 ? '📈' : pressureTrend.change < 0 ? '📉' : '➡️';
+        trendsHTML += `
+            <p>${pressureIcon} Pressure: ${pressureTrend.change > 0 ? '+' : ''}${pressureTrend.change.toFixed(2)} hPa</p>
+        `;
+    }
+
+    trendsHTML += `
+            </div>
+        </div>
+        <div class="footer-item">
+            <strong>📊 Data Points</strong>
+            <p>${history.dates.length} records available</p>
+            <p>Date range: ${history.dates[0]} to ${history.dates[history.dates.length - 1]}</p>
+        </div>
+        <div class="footer-item">
+            <strong>🔍 Latest Readings</strong>
+            <p>Max HCHO: ${formatScientific(history.max_formaldehyde[history.max_formaldehyde.length - 1])}</p>
+            <p>Min HCHO: ${formatScientific(history.min_formaldehyde[history.min_formaldehyde.length - 1])}</p>
+            <p>Pressure: ${history.surface_pressure[history.surface_pressure.length - 1].toFixed(2)} hPa</p>
+        </div>
+    `;
+
+    historicalSection.innerHTML = trendsHTML;
+
+    // Initialize the chart with historical data
+    updateTrendChart(history, 'max_formaldehyde');
+}
+
+// NEW FUNCTION: Add event listeners for chart controls
+function initializeChartControls() {
+    const metricSelect = document.getElementById('metricSelect');
+    const timeframeSelect = document.getElementById('timeframeSelect');
+
+    if (metricSelect && timeframeSelect) {
+        metricSelect.addEventListener('change', function() {
+            // This will be handled when we have the current state data
+            const currentState = document.getElementById('stateSelect').value;
+            if (currentState) {
+                loadHistoricalData(currentState);
+            }
+        });
+
+        timeframeSelect.addEventListener('change', function() {
+            const currentState = document.getElementById('stateSelect').value;
+            if (currentState) {
+                loadHistoricalData(currentState);
+            }
+        });
+    }
+}
+
+// Update the loadHistoricalData function to pass data to chart
+async function loadHistoricalData(state) {
+    try {
+        const response = await fetch(`http://127.0.0.1:5000/api/history/${encodeURIComponent(state)}`);
+        const data = await response.json();
+
+        if (data.error) {
+            console.error('Error loading historical data:', data.error);
+            return;
+        }
+
+        // Update the historical data section
+        updateHistoricalDisplay(data.history, data.trends);
+        
+        // Get selected metric for chart
+        const metricSelect = document.getElementById('metricSelect');
+        const selectedMetric = metricSelect ? metricSelect.value : 'max_formaldehyde';
+        
+        // Update chart with historical data
+        updateTrendChart(data.history, selectedMetric);
+        
+    } catch (err) {
+        console.error('Failed to load historical data:', err);
+    }
+}
+
+// NEW FUNCTION: Generate responsive mitigation recommendations
+function generateMitigationRecommendations(maxFormaldehyde, minFormaldehyde, surfacePressure) {
+    const recommendations = {
+        airQuality: [],
+        weather: [],
+        health: []
+    };
+
+    // Analyze formaldehyde levels
+    const avgFormaldehyde = (maxFormaldehyde + minFormaldehyde) / 2;
+    const formaldehydeLevel = getFormaldehydeLevel(avgFormaldehyde);
+
+    // Analyze pressure levels (typical range: 980-1050 hPa)
+    const pressureLevel = getPressureLevel(surfacePressure);
+
+    // Generate air quality recommendations based on formaldehyde
+    if (formaldehydeLevel === 'very_high' || formaldehydeLevel === 'high') {
+        recommendations.airQuality.push(
+            "🚫 Avoid outdoor activities, especially strenuous exercise",
+            "🏠 Stay indoors with windows closed",
+            "💨 Use air purifiers with HEPA and activated carbon filters",
+            "🌳 Avoid areas with heavy traffic or industrial activity",
+            "🕒 Limit outdoor time to early morning when pollution is lower"
+        );
+        
+        recommendations.health.push(
+            "😷 Wear N95 masks if going outside is necessary",
+            "👀 Watch for symptoms: eye irritation, coughing, breathing difficulty",
+            "🏥 Seek medical attention for severe respiratory symptoms",
+            "💧 Drink plenty of water to help flush toxins",
+            "🚭 Avoid additional irritants like cigarette smoke"
+        );
+
+        // Emergency tips for very high levels
+        if (formaldehydeLevel === 'very_high') {
+            recommendations.airQuality.push(
+                "🚨 CONSIDER RELOCATION: Very high formaldehyde levels detected",
+                "🔬 Contact local environmental agency for immediate assessment"
+            );
+            recommendations.health.push(
+                "🚨 EMERGENCY: People with asthma or respiratory conditions should evacuate if possible",
+                "📞 Contact healthcare provider for preventive measures"
+            );
+        }
+    } else if (formaldehydeLevel === 'moderate') {
+        recommendations.airQuality.push(
+            "⏰ Limit prolonged outdoor exposure",
+            "🏡 Ventilate home during periods of lower pollution",
+            "🚶 Choose walking routes away from busy roads",
+            "🌿 Add indoor plants that help purify air (peace lily, spider plant)"
+        );
+        recommendations.health.push(
+            "👃 Use saline nasal sprays to reduce irritation",
+            "👁️ Use lubricating eye drops if experiencing irritation",
+            "🍎 Eat antioxidant-rich foods (berries, leafy greens)"
+        );
+    } else {
+        recommendations.airQuality.push(
+            "✅ Air quality is good - maintain normal activities",
+            "🌬️ Continue good ventilation practices",
+            "🚶 Enjoy outdoor activities as usual",
+            "🌳 Support local green initiatives to maintain good air quality"
+        );
+        recommendations.health.push(
+            "💪 Good air quality supports respiratory health",
+            "🏃 Excellent conditions for outdoor exercise",
+            "😊 Minimal health risks from air pollution"
+        );
+    }
+
+    // Generate weather recommendations based on surface pressure
+    if (pressureLevel === 'very_low') {
+        recommendations.weather.push(
+            "🌪️ Storm likely - secure outdoor objects",
+            "☔ Carry umbrella and rain protection",
+            "🚗 Drive carefully - potential for strong winds",
+            "📱 Monitor weather alerts for storm warnings",
+            "🏠 Prepare for potential power outages"
+        );
+    } else if (pressureLevel === 'low') {
+        recommendations.weather.push(
+            "🌧️ Rain likely - plan indoor activities",
+            "🧥 Wear waterproof clothing",
+            "🚶 Be cautious of slippery surfaces",
+            "🌡️ Temperature may drop significantly"
+        );
+    } else if (pressureLevel === 'high') {
+        recommendations.weather.push(
+            "☀️ Clear skies expected - great for outdoor plans",
+            "🔆 Use sunscreen - UV exposure may be higher",
+            "💧 Stay hydrated in dry conditions",
+            "🌡️ Large temperature variations between day and night"
+        );
+    } else {
+        recommendations.weather.push(
+            "🌈 Stable weather conditions expected",
+            "👕 Dress in layers for comfort",
+            "🚶 Good conditions for outdoor activities",
+            "📊 Monitor for any sudden pressure changes"
+        );
+    }
+
+    // Special combined situations
+    if (formaldehydeLevel === 'high' && pressureLevel === 'low') {
+        recommendations.airQuality.push(
+            "⚠️ DOUBLE ALERT: High pollution with low pressure may trap pollutants near ground level",
+            "🚨 Air quality may worsen - take extra precautions"
+        );
+    }
+
+    if (formaldehydeLevel === 'high' && pressureLevel === 'high') {
+        recommendations.airQuality.push(
+            "💨 High pressure may help disperse pollutants - monitor for improvement"
+        );
+    }
+
+    return {
+        recommendations,
+        formaldehydeLevel,
+        pressureLevel,
+        situation: getOverallSituation(formaldehydeLevel, pressureLevel)
+    };
+}
+
+// NEW FUNCTION: Determine formaldehyde level
+function getFormaldehydeLevel(avgFormaldehyde) {
+    if (avgFormaldehyde >= 1e16) return 'very_high';     // > 10,000,000,000,000,000
+    if (avgFormaldehyde >= 5e15) return 'high';          // > 5,000,000,000,000,000
+    if (avgFormaldehyde >= 1e15) return 'moderate';      // > 1,000,000,000,000,000
+    return 'good';                                       // < 1,000,000,000,000,000
+}
+
+// NEW FUNCTION: Determine pressure level
+function getPressureLevel(pressure) {
+    if (pressure < 980) return 'very_low';
+    if (pressure < 1000) return 'low';
+    if (pressure > 1030) return 'high';
+    return 'normal';
+}
+
+// NEW FUNCTION: Get overall situation
+function getOverallSituation(formaldehydeLevel, pressureLevel) {
+    if (formaldehydeLevel === 'very_high') return 'critical';
+    if (formaldehydeLevel === 'high') return 'serious';
+    if (formaldehydeLevel === 'moderate') return 'moderate';
+    return 'good';
+}
+
+// NEW FUNCTION: Update mitigation display with recommendations
+function updateMitigationDisplay(maxFormaldehyde, minFormaldehyde, surfacePressure) {
+    const analysis = generateMitigationRecommendations(maxFormaldehyde, minFormaldehyde, surfacePressure);
+    
+    // Update situation alert
+    const situationAlert = document.getElementById('situationAlert');
+    const alertText = situationAlert.querySelector('.alert-text');
+    
+    situationAlert.className = `situation-alert ${analysis.situation}`;
+    
+    const situationMessages = {
+        'critical': '🚨 CRITICAL: Very High Formaldehyde Levels - Take Immediate Action',
+        'serious': '⚠️ SERIOUS: High Formaldehyde Levels - Health Precautions Needed', 
+        'moderate': '🔶 MODERATE: Elevated Formaldehyde Levels - Take Precautions',
+        'good': '✅ GOOD: Air Quality Within Safe Limits - Normal Activities'
+    };
+    
+    alertText.textContent = situationMessages[analysis.situation];
+
+    // Update air quality tips
+    const airQualityTips = document.getElementById('airQualityTips');
+    airQualityTips.innerHTML = analysis.recommendations.airQuality.map(tip => `
+        <li>
+            <span class="tip-icon">💡</span>
+            <span>${tip}</span>
+        </li>
+    `).join('');
+
+    // Update weather tips
+    const weatherTips = document.getElementById('weatherTips');
+    weatherTips.innerHTML = analysis.recommendations.weather.map(tip => `
+        <li>
+            <span class="tip-icon">💡</span>
+            <span>${tip}</span>
+        </li>
+    `).join('');
+
+    // Update health tips
+    const healthTips = document.getElementById('healthTips');
+    healthTips.innerHTML = analysis.recommendations.health.map(tip => {
+        const isEmergency = tip.includes('🚨') || tip.includes('EMERGENCY');
+        return `
+        <li class="${isEmergency ? 'emergency-tip' : ''}">
+            <span class="tip-icon">${isEmergency ? '🚨' : '💡'}</span>
+            <span>${tip}</span>
+        </li>
+        `;
+    }).join('');
+}
+
+// State to coordinates mapping (approximate center points of each state)
+const stateCoordinates = {
+    'Alabama': { lat: 32.8067, lon: -86.7911 },
+    'Alaska': { lat: 61.3850, lon: -152.2683 },
+    'Arizona': { lat: 33.7298, lon: -111.4312 },
+    'Arkansas': { lat: 34.9697, lon: -92.3731 },
+    'California': { lat: 36.1700, lon: -119.7462 },
+    'Colorado': { lat: 39.0646, lon: -105.3272 },
+    'Connecticut': { lat: 41.5834, lon: -72.7622 },
+    'Delaware': { lat: 39.3498, lon: -75.5148 },
+    'Florida': { lat: 27.8333, lon: -81.7170 },
+    'Georgia': { lat: 32.9866, lon: -83.6487 },
+    'Hawaii': { lat: 21.1098, lon: -157.5311 },
+    'Idaho': { lat: 44.2394, lon: -114.5103 },
+    'Illinois': { lat: 40.3363, lon: -89.0022 },
+    'Indiana': { lat: 39.8647, lon: -86.2604 },
+    'Iowa': { lat: 42.0046, lon: -93.2140 },
+    'Kansas': { lat: 38.5111, lon: -96.8005 },
+    'Kentucky': { lat: 37.6690, lon: -84.6514 },
+    'Louisiana': { lat: 31.1801, lon: -91.8749 },
+    'Maine': { lat: 44.6074, lon: -69.3977 },
+    'Maryland': { lat: 39.0724, lon: -76.7902 },
+    'Massachusetts': { lat: 42.2373, lon: -71.5314 },
+    'Michigan': { lat: 43.3504, lon: -84.5603 },
+    'Minnesota': { lat: 45.7326, lon: -93.9196 },
+    'Mississippi': { lat: 32.7673, lon: -89.6812 },
+    'Missouri': { lat: 38.4623, lon: -92.3020 },
+    'Montana': { lat: 46.9048, lon: -110.3261 },
+    'Nebraska': { lat: 41.1289, lon: -98.2883 },
+    'Nevada': { lat: 38.4199, lon: -117.1219 },
+    'New Hampshire': { lat: 43.4108, lon: -71.5653 },
+    'New Jersey': { lat: 40.3140, lon: -74.5089 },
+    'New Mexico': { lat: 34.8375, lon: -106.2371 },
+    'New York': { lat: 42.1497, lon: -74.9384 },
+    'North Carolina': { lat: 35.6411, lon: -79.8431 },
+    'North Dakota': { lat: 47.5362, lon: -99.7930 },
+    'Ohio': { lat: 40.3736, lon: -82.7755 },
+    'Oklahoma': { lat: 35.5376, lon: -96.9247 },
+    'Oregon': { lat: 44.5672, lon: -122.1269 },
+    'Pennsylvania': { lat: 40.5773, lon: -77.2640 },
+    'Rhode Island': { lat: 41.6772, lon: -71.5101 },
+    'South Carolina': { lat: 33.8191, lon: -80.9066 },
+    'South Dakota': { lat: 44.2853, lon: -99.4632 },
+    'Tennessee': { lat: 35.7449, lon: -86.7489 },
+    'Texas': { lat: 31.1060, lon: -97.6475 },
+    'Utah': { lat: 40.1135, lon: -111.8535 },
+    'Vermont': { lat: 44.0407, lon: -72.7093 },
+    'Virginia': { lat: 37.7680, lon: -78.2057 },
+    'Washington': { lat: 47.3917, lon: -121.5708 },
+    'West Virginia': { lat: 38.4680, lon: -80.9696 },
+    'Wisconsin': { lat: 44.2563, lon: -89.6385 },
+    'Wyoming': { lat: 42.7475, lon: -107.2085 }
+};
+
+// NEW FUNCTION: Fetch real-time weather data from Open-Meteo
+async function fetchWeatherData(state) {
+    try {
+        // Show loading state
+        document.getElementById('temperature').textContent = 'Loading...';
+        document.getElementById('weatherConditions').textContent = 'Loading...';
+        document.getElementById('humidity').textContent = 'Loading...';
+        document.getElementById('windSpeed').textContent = 'Loading...';
+        document.getElementById('weatherIcon').textContent = '⏳';
+
+        // Get coordinates for the state
+        const coords = stateCoordinates[state];
+        if (!coords) {
+            throw new Error(`No coordinates found for ${state}`);
+        }
+
+        // Open-Meteo API call
+        const response = await fetch(
+            `https://api.open-meteo.com/v1/forecast?latitude=${coords.lat}&longitude=${coords.lon}&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_direction_10m&temperature_unit=fahrenheit&wind_speed_unit=mph&precipitation_unit=inch&timezone=auto`
+        );
+
+        if (!response.ok) {
+            throw new Error('Weather API response was not ok');
+        }
+
+        const weatherData = await response.json();
+
+        if (!weatherData.current) {
+            throw new Error('No current weather data available');
+        }
+
+        // Update weather display
+        updateWeatherDisplay(weatherData.current);
+        
+    } catch (error) {
+        console.error('Error fetching weather data:', error);
+        document.getElementById('temperature').textContent = '--';
+        document.getElementById('weatherConditions').textContent = 'Data unavailable';
+        document.getElementById('humidity').textContent = '--';
+        document.getElementById('windSpeed').textContent = '--';
+        document.getElementById('weatherIcon').textContent = '❌';
+    }
+}
+
+// NEW FUNCTION: Update weather display with data
+function updateWeatherDisplay(currentWeather) {
+    const temp = Math.round(currentWeather.temperature_2m);
+    const humidity = currentWeather.relative_humidity_2m;
+    const windSpeed = Math.round(currentWeather.wind_speed_10m);
+    const weatherCode = currentWeather.weather_code;
+    
+    // Convert weather code to description and icon
+    const weatherInfo = getWeatherInfo(weatherCode);
+    
+    document.getElementById('temperature').textContent = `${temp}°F`;
+    document.getElementById('weatherConditions').textContent = weatherInfo.description;
+    document.getElementById('humidity').textContent = `${humidity}%`;
+    document.getElementById('windSpeed').textContent = `${windSpeed} mph`;
+    document.getElementById('weatherIcon').textContent = weatherInfo.icon;
+}
+
+// NEW FUNCTION: Map weather codes to descriptions and icons
+function getWeatherInfo(weatherCode) {
+    const weatherMap = {
+        0: { description: 'Clear sky', icon: '☀️' },
+        1: { description: 'Mainly clear', icon: '🌤️' },
+        2: { description: 'Partly cloudy', icon: '⛅' },
+        3: { description: 'Overcast', icon: '☁️' },
+        45: { description: 'Fog', icon: '🌫️' },
+        48: { description: 'Depositing rime fog', icon: '🌫️' },
+        51: { description: 'Light drizzle', icon: '🌦️' },
+        53: { description: 'Moderate drizzle', icon: '🌦️' },
+        55: { description: 'Dense drizzle', icon: '🌦️' },
+        56: { description: 'Light freezing drizzle', icon: '🌨️' },
+        57: { description: 'Dense freezing drizzle', icon: '🌨️' },
+        61: { description: 'Slight rain', icon: '🌧️' },
+        63: { description: 'Moderate rain', icon: '🌧️' },
+        65: { description: 'Heavy rain', icon: '⛈️' },
+        66: { description: 'Light freezing rain', icon: '🌨️' },
+        67: { description: 'Heavy freezing rain', icon: '🌨️' },
+        71: { description: 'Slight snow fall', icon: '🌨️' },
+        73: { description: 'Moderate snow fall', icon: '🌨️' },
+        75: { description: 'Heavy snow fall', icon: '❄️' },
+        77: { description: 'Snow grains', icon: '🌨️' },
+        80: { description: 'Slight rain showers', icon: '🌦️' },
+        81: { description: 'Moderate rain showers', icon: '🌧️' },
+        82: { description: 'Violent rain showers', icon: '⛈️' },
+        85: { description: 'Slight snow showers', icon: '🌨️' },
+        86: { description: 'Heavy snow showers', icon: '❄️' },
+        95: { description: 'Thunderstorm', icon: '⛈️' },
+        96: { description: 'Thunderstorm with slight hail', icon: '⛈️' },
+        99: { description: 'Thunderstorm with heavy hail', icon: '⛈️' }
+    };
+    
+    return weatherMap[weatherCode] || { description: 'Unknown', icon: '❓' };
+}
+
+  </script>
+
+
+</body>
+</html>
