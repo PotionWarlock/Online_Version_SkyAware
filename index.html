@@ -739,7 +739,7 @@ await loadHistoricalData(selectedState);
 
       } catch (err) {
         console.error('Connection error:', err);
-        alert('❌ Cannot connect to backend! Make sure the Flask server is running on http://127.0.0.1:5000');
+        alert('❌ Cannot connect to backend! Make sure the Flask server is running on Rendeer.com');
         
         // Reset display values
         document.getElementById('surfacePressure').textContent = '--';
@@ -1090,7 +1090,7 @@ function initializeChartControls() {
 // Update the loadHistoricalData function to pass data to chart
 async function loadHistoricalData(state) {
     try {
-        const response = await fetch(`http://127.0.0.1:5000/api/history/${encodeURIComponent(state)}`);
+        const response = await fetch(`/api/history/${encodeURIComponent(state)}`);
         const data = await response.json();
 
         if (data.error) {
